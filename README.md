@@ -31,12 +31,12 @@ Follow these steps to set up and run the project locally.
 ### 1. Clone the Repository
 Clone the repository to your local machine using Git:
 ```bash
-git clone https://github.com/aleattene/asd-management-webapp-responsive-backend-django.git
+git clone https://github.com/aleattene/asd-management-backend-django.git
 ```
 
 ### 2. Navigate to the Project Directory
 ```bash
-cd asd-management-webapp-responsive-backend-django
+cd asd-management-backend-django
 ```
 
 ### 3. Create a Virtual Environment
