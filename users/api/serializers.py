@@ -3,6 +3,13 @@ from rest_framework import serializers
 from users.models import CustomUser
 
 
+class _FiscalCodeNormalizeMixin:
+    """Normalize fiscal_code: convert empty string to None before DB write."""
+
+    def validate_fiscal_code(self, value: str) -> str | None:
+        return value.strip() or None
+
+
 class UserListSerializer(serializers.ModelSerializer):
     """Serializer for listing users (minimal fields)."""
 
@@ -20,7 +27,7 @@ class UserListSerializer(serializers.ModelSerializer):
         ]
 
 
-class UserDetailSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(_FiscalCodeNormalizeMixin, serializers.ModelSerializer):
     """Serializer for user detail view."""
 
     class Meta:
@@ -47,7 +54,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         read_only_fields: list[str] = ["id", "role", "created_at", "updated_at"]
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(_FiscalCodeNormalizeMixin, serializers.ModelSerializer):
     """Serializer for creating a new user (admin/operator only).
 
     Role is intentionally excluded: new users are always created with the
@@ -81,7 +88,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         )
 
 
-class UserMeSerializer(serializers.ModelSerializer):
+class UserMeSerializer(_FiscalCodeNormalizeMixin, serializers.ModelSerializer):
     """Serializer for the authenticated user's own profile."""
 
     class Meta:
