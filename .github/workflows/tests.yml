@@ -16,12 +16,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
 
       - name: Install dependencies
         run: |
@@ -32,11 +32,11 @@ jobs:
         run: echo "ENVIRONMENT=test" >> $GITHUB_ENV
 
       - name: Run migrations
-        run: python manage.py migrate
+        run: python manage.py migrate --settings=config.settings.test
 
       - name: Run tests
         run: |
-          coverage run manage.py test && coverage report --show-missing
+          coverage run manage.py test --settings=config.settings.test && coverage report --show-missing
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
