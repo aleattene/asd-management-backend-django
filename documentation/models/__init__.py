@@ -1,1 +1,0 @@
-from .sport_certificates import SportCertificate
