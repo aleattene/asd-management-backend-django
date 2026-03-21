@@ -164,9 +164,7 @@ config/
 users/                  # Custom user model with roles + JWT
 athletes/               # Athlete registry + categories
 staff/                  # Trainers + sport doctors
-docs/
-    PROJECT_SPEC.md     # Full project specification
-    legacy_schema.sql   # Legacy SQL schema (reference only)
+docs/                   # Additional project documentation
 ```
 
 ---

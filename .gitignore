@@ -161,6 +161,9 @@ cython_debug/
 .claude/
 CLAUDE.md
 
+# Internal notes — never commit
+TODO.md
+
 # Internal documentation — not for public repositories
 docs/legacy_schema.sql
 docs/PROJECT_SPEC.md
