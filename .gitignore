@@ -157,8 +157,8 @@ cython_debug/
 # macOS
 .DS_Store
 
-# Claude Code (local user settings only — project settings.json can be committed)
-.claude/settings.local.json
+# Claude Code
+.claude/
 CLAUDE.md
 
 # Internal documentation — not for public repositories
