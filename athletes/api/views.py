@@ -2,7 +2,7 @@ from rest_framework import permissions, viewsets, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from config.permissions import IsAdminOrReadOnly
+from config.permissions import IsAdminOrOperatorOrReadOnly
 from athletes.models import Athlete, Category
 from .serializers import AthleteListSerializer, AthleteDetailSerializer, CategorySerializer
 
@@ -61,4 +61,4 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes: list = [IsAdminOrReadOnly]
+    permission_classes: list = [IsAdminOrOperatorOrReadOnly]

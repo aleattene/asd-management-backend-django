@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.test import TestCase
 
 from users.models import CustomUser, UserRole
@@ -76,7 +77,7 @@ class CustomUserModelTests(TestCase):
         self.assertEqual(repr(self.user), "CustomUser(username=mario, role=member)")
 
     def test_email_unique(self) -> None:
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError):
             CustomUser.objects.create_user(
                 username="altro",
                 email="mario@example.com",
@@ -84,7 +85,7 @@ class CustomUserModelTests(TestCase):
             )
 
     def test_fiscal_code_unique(self) -> None:
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError):
             CustomUser.objects.create_user(
                 username="altro",
                 email="altro@example.com",

@@ -1,8 +1,8 @@
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 
 from .views import AthleteViewSet, CategoryViewSet
 
-router: DefaultRouter = DefaultRouter()
+router: SimpleRouter = SimpleRouter()
 router.register("athletes", AthleteViewSet, basename="athlete")
 router.register("categories", CategoryViewSet, basename="category")
 

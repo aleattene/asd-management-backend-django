@@ -139,7 +139,6 @@ class UserCRUDTests(TestCase):
                 "password": "newpass123",
                 "first_name": "Nuovo",
                 "last_name": "Utente",
-                "role": "member",
             },
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
