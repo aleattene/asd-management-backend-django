@@ -1,0 +1,10 @@
+Django
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers
+django-environ
+django-extensions
+django-filter
+drf-spectacular
+Pillow
+psycopg2-binary
