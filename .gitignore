@@ -161,6 +161,10 @@ cython_debug/
 .claude/settings.local.json
 CLAUDE.md
 
+# Internal documentation — not for public repositories
+docs/legacy_schema.sql
+docs/PROJECT_SPEC.md
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
