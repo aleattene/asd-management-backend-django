@@ -1,6 +1,6 @@
-# ASD Management
+# ASD Management — Backend
 
-#### Responsive web app for managing a Sports Association.
+#### REST API backend for managing a Sports Association (ASD).
 
 ![Python](https://badgen.net/badge/Built%20with/Python/blue)
 ![Django](https://img.shields.io/badge/Built%20with-Django-092E20)
@@ -12,157 +12,172 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/aleattene/asd-management-webapp-responsive-backend-django/pulls)
 [![License](https://img.shields.io/github/license/aleattene/asd-management-webapp-responsive-backend-django?color=blue)](https://github.com/aleattene/asd-management-webapp-responsive-backend-django/blob/main/LICENSE)
 
+*Work in Progress*
 
-*Work in Progress....*
+---
 
-**Backend** deploy (**django**-vercel / **postgres**-supabase):
+## Overview
 
-https://asd-management-django.vercel.app/
+Django REST Framework backend for the internal management of a Sports Association.
+This is **not** an e-commerce or SaaS platform — it is a management tool used
+by ASD staff and members to handle registrations, documentation, and athlete data.
 
-Frontend deploy (**react**-netlify):
+The frontend (React) lives in a separate repository and consumes these APIs.
 
-https://asd-management.netlify.app/
+**Stack:**
+- Python 3.13+
+- Django 6.0+
+- Django REST Framework 3.17+
+- PostgreSQL (SQLite for local development)
+- JWT authentication (djangorestframework-simplejwt)
+- API documentation via drf-spectacular (Swagger UI)
 
-![image](https://user-images.githubusercontent.com/74595044/153876039-85241269-cc8b-40ec-94db-9def28df9d5e.png)
+---
 
 ## Installation
-Follow these steps to set up and run the project locally.
 
-### 1. Clone the Repository
-Clone the repository to your local machine using Git:
+### 1. Clone the repository
 ```bash
-git clone https://github.com/aleattene/asd-management-backend-django.git
+git clone https://github.com/aleattene/asd-management-backend.git
+cd asd-management-backend
 ```
 
-### 2. Navigate to the Project Directory
+### 2. Create and activate a virtual environment
 ```bash
-cd asd-management-backend-django
+python3.13 -m venv .venv
+source .venv/bin/activate        # macOS/Linux
+.venv\Scripts\activate           # Windows
 ```
 
-### 3. Create a Virtual Environment
-It's recommended to use a virtual environment to manage project dependencies.
-
-**Using** `venv`:
-```bash
-python3.11 -m venv asd_venv
-```
-
-### 4. Activate the Virtual Environment
-**On Unix or macOS**:
-```bash
-source asd_venv/bin/activate
-```
-**On Windows**:
-```bash
-asd_venv\Scripts\activate
-```
-
-### 5. Install Dependencies
-Install the required Python packages using `pip`:
+### 3. Install dependencies
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-<hr/>
+For development (includes pytest, coverage, ruff):
+```bash
+pip install -r requirements_dev.txt
+```
+
+> **Dependency management:** this project uses [pip-tools](https://github.com/jazzband/pip-tools).
+> The `requirements*.txt` files are compiled from `requirements*.in` and should not be edited directly.
+> To add or update a dependency, edit the relevant `.in` file and recompile:
+> ```bash
+> pip-compile requirements.in
+> pip-compile requirements_dev.in
+> ```
+
+---
 
 ## Configuration
 
-The project uses environment variables to manage sensitive information and configuration settings. 
-Follow these steps to set up your environment variables.
+The project reads configuration from environment variables. Create a `.env` file
+in the project root with the following variables:
 
-### 1 Create a `.env` File
-In the root directory of the project, create a file named `.env`
-
-### 2. Add Environment Variables
-Open the .env`` file in your preferred text editor and add the following variables:
 ```bash
-SECRET_KEY=
-DEBUG=
-ALLOWED_HOSTS=
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+CORS_ALLOWED_ORIGINS=http://localhost:3000
+
+# PostgreSQL (production only)
+POSTGRES_DATABASE=asd_management
+POSTGRES_USER=your_db_user
+POSTGRES_PASSWORD=your_db_password
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
 ```
 
-<hr/>
+---
 
-## Running the Server
-Once the setup is complete, you can run the Django development server.
+## Running the server
 
-### 1. Apply Migrations
-Ensure all database migrations are applied:
+### 1. Apply migrations
 ```bash
 python manage.py migrate
 ```
 
-### 2. Create a Superuser (Optional)
-To access the Django admin interface, create a superuser:
+### 2. Create a superuser (technical admin only)
 ```bash
 python manage.py createsuperuser
 ```
-Follow the prompts to set up your superuser account.
 
-### 3. Run the Development Server
-Start the Django development server:
-
+### 3. Start the development server
 ```bash
 python manage.py runserver
 ```
-Access the application by navigating to `http://localhost:8000/` in your web browser.
 
-<hr/>
+The API will be available at `http://localhost:8000/api/v1/`.
 
-## Running Tests
-The project uses Django's built-in testing framework along with coverage.py to measure test coverage.
+---
 
-### 1. Run Tests with Coverage
-Execute the tests and generate a coverage report:
+## API Documentation
 
-```bash
-coverage run manage.py test && coverage report --show-missing
+Swagger UI is available at:
+```
+http://localhost:8000/api/schema/swagger-ui/
 ```
 
-<hr/>
+OpenAPI schema (JSON) at:
+```
+http://localhost:8000/api/schema/
+```
+
+### Main endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/auth/token/` | Obtain JWT token pair |
+| POST | `/api/v1/auth/token/refresh/` | Refresh access token |
+| GET/PATCH | `/api/v1/users/me/` | Own profile |
+| GET/POST | `/api/v1/users/` | List/create users (admin/operator) |
+| GET/POST | `/api/v1/athletes/` | List/create athletes |
+| GET/POST | `/api/v1/categories/` | List/create categories |
+| GET/POST | `/api/v1/trainers/` | List/create trainers |
+| GET/POST | `/api/v1/doctors/` | List/create sport doctors |
+
+---
+
+## Running tests
+
+```bash
+python manage.py test --settings=config.settings.test
+```
+
+With coverage:
+```bash
+coverage run manage.py test --settings=config.settings.test
+coverage report --show-missing
+```
+
+---
+
+## Project structure
+
+```
+config/
+    settings/           # base / development / production / test
+    urls.py             # API-only routing + Django Admin
+    permissions.py      # Role-based permission classes
+    pagination.py       # Standard pagination
+users/                  # Custom user model with roles + JWT
+athletes/               # Athlete registry + categories
+staff/                  # Trainers + sport doctors
+docs/                   # Additional project documentation
+```
+
+---
 
 ## Contributing
-Contributions are welcome! Please follow these steps:
 
-### 1. Fork the Repository
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Commit following [Conventional Commits](https://www.conventionalcommits.org/)
+4. Open a pull request to `main`
 
-Click the "Fork" button on the top-right corner of the repository page.
-
-### 2. Clone Your Fork
-
-```bash
-git clone https://github.com/aleattene/asd-management-webapp-responsive-backend-django.git
-```
-
-### 3. Create a New Branch
-
-```bash
-git checkout -b feature/your-feature-name
-```
-
-### 4. Make Your Changes
-
-### 5. Commit Your Changes
-
-```bash
-git commit -m "Add a meaningful commit message"
-```
-
-### 6. Push to Your Fork
-
-```bash
-git push origin feature/your-feature-name
-```
-
-### 7. Create a Pull Request
-
-Go to the original repository and create a pull request from your fork (from the `feature/your-feature-name` branch 
-to the `main` branch).
-
-<hr/>
+---
 
 ## License
-This project is licensed under the [MIT License](https://it.wikipedia.org/wiki/Licenza_MIT).
 
-<hr/>
+This project is licensed under the [MIT License](LICENSE).

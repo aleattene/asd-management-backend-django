@@ -1,15 +1,41 @@
 from rest_framework import permissions
+from rest_framework.request import Request
+from rest_framework.views import APIView
 
 
-class IsAdminOrReadOnly(permissions.BasePermission):
-    """
-    Allows read-only access to any user, but only admin users can create, update, or delete.
-    """
+class IsRoleAdminOrSuperadmin(permissions.BasePermission):
+    """Allows access only to users with role admin or superadmin."""
 
-    def has_permission(self, request, view):
-        # Allow all SAFE_METHODS (GET, HEAD, OPTIONS)
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return request.user.role in ("admin", "superadmin")
+
+
+class IsAdminOrOperator(permissions.BasePermission):
+    """Allows access to admin, superadmin, and operator roles."""
+
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return request.user.role in ("admin", "superadmin", "operator")
+
+
+class IsTrainer(permissions.BasePermission):
+    """Allows access only to users with trainer role."""
+
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return request.user.role == "trainer"
+
+
+class IsAdminOrOperatorOrReadOnly(permissions.BasePermission):
+    """Allows read-only access to any authenticated user, write access to admin/operator/superadmin."""
+
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        if not request.user or not request.user.is_authenticated:
+            return False
         if request.method in permissions.SAFE_METHODS:
             return True
-
-        # If the request is not a SAFE_METHOD, check if the user is an admin
-        return request.user and request.user.is_authenticated and request.user.is_staff
+        return request.user.role in ("admin", "superadmin", "operator")

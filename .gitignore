@@ -60,6 +60,8 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+staticfiles/
+media/
 
 # Flask stuff:
 instance/
@@ -151,6 +153,20 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# macOS
+.DS_Store
+
+# Claude Code
+.claude/
+CLAUDE.md
+
+# Internal notes — never commit
+TODO.md
+
+# Internal documentation — not for public repositories
+docs/legacy_schema.sql
+docs/PROJECT_SPEC.md
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

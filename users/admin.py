@@ -1,25 +1,56 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from users.models import CustomUser
+
+from .models import CustomUser
 
 
+@admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    model = CustomUser
-    # Fields to display in the admin panel
-    list_display = ['username', 'is_superuser', 'is_staff', 'is_active']
-    # Fields where you can search in the admin panel search bar
-    search_fields = ['username', 'email']
-    # Sidebar filters
-    list_filter = ['is_superuser', 'is_staff', 'is_active']
-    # Fields ordering
-    ordering = ['-is_superuser', '-is_staff', '-is_active']
+    """Admin configuration for CustomUser."""
 
-    # fieldsets = (
-    #     (None, {'fields': ('username', 'password')}),
-    #     ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'phone_number', 'date_of_birth', 'bio')}),
-    #     ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-    #     ('Important dates', {'fields': ('last_login', 'date_joined')}),
-    # )
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "role",
+        "is_authorized",
+        "is_active",
+    )
+    list_filter = ("role", "is_authorized", "is_active", "is_staff")
+    search_fields = ("username", "email", "first_name", "last_name", "fiscal_code")
 
+    fieldsets = UserAdmin.fieldsets + (
+        (
+            "Informazioni aggiuntive",
+            {
+                "fields": (
+                    "role",
+                    "fiscal_code",
+                    "phone_number",
+                    "date_of_birth",
+                    "is_authorized",
+                ),
+            },
+        ),
+        (
+            "Indirizzo",
+            {
+                "fields": (
+                    "address_street",
+                    "address_number",
+                    "address_zip",
+                    "municipality",
+                ),
+            },
+        ),
+    )
 
-admin.site.register(CustomUser, CustomUserAdmin)
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        (
+            "Informazioni aggiuntive",
+            {
+                "fields": ("email", "role", "fiscal_code", "phone_number"),
+            },
+        ),
+    )
