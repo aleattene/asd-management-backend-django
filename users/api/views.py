@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -40,11 +41,9 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save(update_fields=["is_active"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=["get", "patch"], permission_classes=[])
+    @action(detail=False, methods=["get", "patch"], permission_classes=[IsAuthenticated])
     def me(self, request: Request) -> Response:
         """View or update the authenticated user's own profile."""
-        if not request.user.is_authenticated:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
         if request.method == "GET":
             serializer = UserMeSerializer(request.user)
             return Response(serializer.data)

@@ -3,7 +3,7 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 
 
-class IsAdminUser(permissions.BasePermission):
+class IsRoleAdminOrSuperadmin(permissions.BasePermission):
     """Allows access only to users with role admin or superadmin."""
 
     def has_permission(self, request: Request, view: APIView) -> bool:

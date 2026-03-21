@@ -43,6 +43,7 @@ class Migration(migrations.Migration):
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
             ],
             options={
+                'ordering': ['last_name', 'first_name'],
                 'verbose_name': 'Utente',
                 'verbose_name_plural': 'Utenti',
             },
