@@ -44,11 +44,15 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields: list[str] = ["id", "created_at", "updated_at"]
+        read_only_fields: list[str] = ["id", "role", "created_at", "updated_at"]
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating a new user (admin/operator only)."""
+    """Serializer for creating a new user (admin/operator only).
+
+    Role is intentionally excluded: new users are always created with the
+    default role (member). Role changes require a dedicated superadmin endpoint.
+    """
 
     password = serializers.CharField(write_only=True, min_length=8)
 
@@ -63,15 +67,18 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "fiscal_code",
             "phone_number",
             "date_of_birth",
-            "role",
         ]
 
     def create(self, validated_data: dict) -> CustomUser:
         password: str = validated_data.pop("password")
-        user: CustomUser = CustomUser(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
+        username: str = validated_data.pop("username")
+        email: str = validated_data.pop("email")
+        return CustomUser.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            **validated_data,
+        )
 
 
 class UserMeSerializer(serializers.ModelSerializer):
