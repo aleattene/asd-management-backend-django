@@ -10,10 +10,14 @@ from .serializers import CountrySerializer, ProvinceSerializer, MunicipalitySeri
 class CountryViewSet(viewsets.ModelViewSet):
     """CRUD API for countries. Read-only for all authenticated users."""
 
-    queryset = Country.objects.filter(is_active=True)
     serializer_class = CountrySerializer
     permission_classes: list = [IsAdminOrOperatorOrReadOnly]
     search_fields: list[str] = ["name", "iso_code"]
+
+    def get_queryset(self):
+        if self.action == "list":
+            return Country.objects.filter(is_active=True)
+        return Country.objects.all()
 
 
 class ProvinceViewSet(viewsets.ModelViewSet):
