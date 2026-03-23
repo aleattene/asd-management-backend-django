@@ -79,6 +79,14 @@ class ProvinceAPITests(GeographySetupMixin, TestCase):
         response = self.client.get("/api/v1/provinces/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_admin_can_create_province(self) -> None:
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.post(
+            "/api/v1/provinces/",
+            {"name": "Milano", "code": "MI"},
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def test_member_cannot_create_province(self) -> None:
         self.client.force_authenticate(user=self.member)
         response = self.client.post(
@@ -114,6 +122,14 @@ class MunicipalityAPITests(GeographySetupMixin, TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 1)
         self.assertEqual(response.data["results"][0]["name"], "Roma")
+
+    def test_admin_can_create_municipality(self) -> None:
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.post(
+            "/api/v1/municipalities/",
+            {"name": "Ostia", "province": self.province.pk},
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_member_cannot_create_municipality(self) -> None:
         self.client.force_authenticate(user=self.member)
