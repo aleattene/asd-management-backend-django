@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from athletes.models import Athlete, Category
+from geography.models import Country
 from staff.models import Trainer
 from users.models import CustomUser, UserRole
 
@@ -116,3 +117,39 @@ class AthleteAPITests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.athlete.refresh_from_db()
         self.assertFalse(self.athlete.is_active)
+
+    def test_athlete_detail_exposes_nationality_fields(self) -> None:
+        country: Country = Country.objects.create(name="Italia", iso_code="ITA")
+        self.athlete.nationality = country
+        self.athlete.save()
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(f"/api/v1/athletes/{self.athlete.pk}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["nationality"], country.pk)
+        self.assertEqual(response.data["nationality_detail"]["iso_code"], "ITA")
+
+    def test_athlete_detail_nationality_none_when_not_set(self) -> None:
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(f"/api/v1/athletes/{self.athlete.pk}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(response.data["nationality"])
+        self.assertIsNone(response.data["nationality_detail"])
+
+    def test_admin_can_set_nationality_on_create(self) -> None:
+        country: Country = Country.objects.create(name="Francia", iso_code="FRA")
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.post(
+            "/api/v1/athletes/",
+            {
+                "guardian": self.member.pk,
+                "first_name": "Luca",
+                "last_name": "Verdi",
+                "fiscal_code": "VRDLCU13C01H501C",
+                "date_of_birth": "2013-03-01",
+                "place_of_birth": "Torino",
+                "category": self.category.pk,
+                "nationality": country.pk,
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["nationality"], country.pk)
