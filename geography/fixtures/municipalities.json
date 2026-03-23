@@ -1,0 +1,22 @@
+[
+  {"model": "geography.municipality", "pk": 1, "fields": {"name": "Roma", "province": 86}},
+  {"model": "geography.municipality", "pk": 2, "fields": {"name": "Milano", "province": 58}},
+  {"model": "geography.municipality", "pk": 3, "fields": {"name": "Napoli", "province": 61}},
+  {"model": "geography.municipality", "pk": 4, "fields": {"name": "Torino", "province": 98}},
+  {"model": "geography.municipality", "pk": 5, "fields": {"name": "Palermo", "province": 68}},
+  {"model": "geography.municipality", "pk": 6, "fields": {"name": "Genova", "province": 39}},
+  {"model": "geography.municipality", "pk": 7, "fields": {"name": "Bologna", "province": 15}},
+  {"model": "geography.municipality", "pk": 8, "fields": {"name": "Firenze", "province": 35}},
+  {"model": "geography.municipality", "pk": 9, "fields": {"name": "Bari", "province": 9}},
+  {"model": "geography.municipality", "pk": 10, "fields": {"name": "Catania", "province": 24}},
+  {"model": "geography.municipality", "pk": 11, "fields": {"name": "Venezia", "province": 105}},
+  {"model": "geography.municipality", "pk": 12, "fields": {"name": "Verona", "province": 108}},
+  {"model": "geography.municipality", "pk": 13, "fields": {"name": "Messina", "province": 57}},
+  {"model": "geography.municipality", "pk": 14, "fields": {"name": "Padova", "province": 67}},
+  {"model": "geography.municipality", "pk": 15, "fields": {"name": "Trieste", "province": 102}},
+  {"model": "geography.municipality", "pk": 16, "fields": {"name": "Taranto", "province": 95}},
+  {"model": "geography.municipality", "pk": 17, "fields": {"name": "Brescia", "province": 17}},
+  {"model": "geography.municipality", "pk": 18, "fields": {"name": "Prato", "province": 79}},
+  {"model": "geography.municipality", "pk": 19, "fields": {"name": "Reggio Calabria", "province": 82}},
+  {"model": "geography.municipality", "pk": 20, "fields": {"name": "Modena", "province": 59}}
+]

@@ -78,8 +78,13 @@ class CustomUser(AbstractUser):
     address_zip = models.CharField(
         max_length=5, blank=True, default="", verbose_name="CAP"
     )
-    municipality = models.CharField(
-        max_length=150, blank=True, default="", verbose_name="Comune"
+    municipality = models.ForeignKey(
+        "geography.Municipality",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="users",
+        verbose_name="Comune",
     )
     is_authorized = models.BooleanField(
         default=False, verbose_name="Autorizzato"

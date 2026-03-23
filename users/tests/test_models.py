@@ -106,4 +106,4 @@ class CustomUserModelTests(TestCase):
         self.assertEqual(self.user.address_street, "")
         self.assertEqual(self.user.address_number, "")
         self.assertEqual(self.user.address_zip, "")
-        self.assertEqual(self.user.municipality, "")
+        self.assertIsNone(self.user.municipality)

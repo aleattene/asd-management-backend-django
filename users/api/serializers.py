@@ -52,6 +52,7 @@ class UserDetailSerializer(_FiscalCodeNormalizeMixin, serializers.ModelSerialize
             "updated_at",
         ]
         read_only_fields: list[str] = ["id", "role", "created_at", "updated_at"]
+        extra_kwargs: dict = {"municipality": {"required": False}}
 
 
 class UserCreateSerializer(_FiscalCodeNormalizeMixin, serializers.ModelSerializer):

@@ -1,0 +1,12 @@
+[
+  {"model": "geography.country", "pk": 1, "fields": {"name": "Italia", "iso_code": "ITA", "is_active": true}},
+  {"model": "geography.country", "pk": 2, "fields": {"name": "Francia", "iso_code": "FRA", "is_active": true}},
+  {"model": "geography.country", "pk": 3, "fields": {"name": "Germania", "iso_code": "DEU", "is_active": true}},
+  {"model": "geography.country", "pk": 4, "fields": {"name": "Spagna", "iso_code": "ESP", "is_active": true}},
+  {"model": "geography.country", "pk": 5, "fields": {"name": "Portogallo", "iso_code": "PRT", "is_active": true}},
+  {"model": "geography.country", "pk": 6, "fields": {"name": "Regno Unito", "iso_code": "GBR", "is_active": true}},
+  {"model": "geography.country", "pk": 7, "fields": {"name": "Romania", "iso_code": "ROU", "is_active": true}},
+  {"model": "geography.country", "pk": 8, "fields": {"name": "Albania", "iso_code": "ALB", "is_active": true}},
+  {"model": "geography.country", "pk": 9, "fields": {"name": "Marocco", "iso_code": "MAR", "is_active": true}},
+  {"model": "geography.country", "pk": 10, "fields": {"name": "Brasile", "iso_code": "BRA", "is_active": true}}
+]

@@ -32,6 +32,14 @@ class Athlete(models.Model):
         related_name="athletes",
         verbose_name="Allenatore",
     )
+    nationality = models.ForeignKey(
+        "geography.Country",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="athletes",
+        verbose_name="Nazionalità",
+    )
     is_active = models.BooleanField(default=True, verbose_name="Attivo")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
