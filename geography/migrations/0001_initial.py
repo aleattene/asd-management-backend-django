@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100, verbose_name='Nome')),
-                ('iso_code', models.CharField(blank=True, default='', max_length=3, unique=True, verbose_name='Codice ISO')),
+                ('iso_code', models.CharField(max_length=3, unique=True, verbose_name='Codice ISO')),
                 ('is_active', models.BooleanField(default=True, verbose_name='Attivo')),
             ],
             options={
