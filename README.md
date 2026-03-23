@@ -139,6 +139,9 @@ http://localhost:8000/api/schema/
 | GET/POST | `/api/v1/doctors/` | List/create sport doctors |
 | GET/POST | `/api/v1/enrollments/` | List/create season enrollments |
 | GET/POST | `/api/v1/certificates/` | List/create sport medical certificates |
+| GET | `/api/v1/countries/` | List countries (read-only for members) |
+| GET | `/api/v1/provinces/` | List Italian provinces (read-only for members) |
+| GET | `/api/v1/municipalities/` | List municipalities, filter by `?province=<id>` |
 
 ---
 
@@ -170,6 +173,7 @@ staff/                  # Trainers (internal ASD staff)
 doctors/                # Sport doctors (external professionals)
 enrollments/            # Season enrollments
 certificates/           # Sport medical certificates
+geography/              # Reference data: countries, provinces, municipalities
 docs/                   # Additional project documentation
 ```
 
