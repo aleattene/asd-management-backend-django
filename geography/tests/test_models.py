@@ -69,3 +69,14 @@ class MunicipalityModelTests(TestCase):
     def test_province_protect_on_delete(self) -> None:
         with self.assertRaises(ProtectedError):
             self.province.delete()
+
+    def test_unique_name_per_province(self) -> None:
+        with self.assertRaises(IntegrityError):
+            Municipality.objects.create(name="Roma", province=self.province)
+
+    def test_same_name_different_province_allowed(self) -> None:
+        other_province: Province = Province.objects.create(name="Milano", code="MI")
+        duplicate: Municipality = Municipality.objects.create(
+            name="Roma", province=other_province
+        )
+        self.assertEqual(duplicate.province.code, "MI")

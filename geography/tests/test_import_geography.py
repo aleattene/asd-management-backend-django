@@ -136,7 +136,8 @@ class ImportEdgeCaseTests(TestCase):
     """Tests for edge cases."""
 
     def test_missing_csv_raises_error(self) -> None:
-        fake_dir: Path = Path("/nonexistent/path")
+        # Use a guaranteed-missing path inside the test data directory
+        fake_dir: Path = TEST_DATA_DIR / "_nonexistent_subdir_for_test"
         with patch(PATCH_TARGET, fake_dir):
             with self.assertRaises(CommandError):
                 call_command("import_geography", "--countries")
