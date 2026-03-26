@@ -49,6 +49,10 @@ INSTALLED_APPS: list[str] = [
     "enrollments",
     "certificates",
     "geography",
+    "companies",
+    "payment_methods",
+    "invoices",
+    "receipts",
 ]
 
 MIDDLEWARE: list[str] = [
