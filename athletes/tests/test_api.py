@@ -17,9 +17,21 @@ class CategoryAPITests(TestCase):
             username="admin", email="admin@example.com",
             password="adminpass123", role=UserRole.ADMIN,
         )
+        self.operator: CustomUser = CustomUser.objects.create_user(
+            username="operator", email="operator@example.com",
+            password="operatorpass123", role=UserRole.OPERATOR,
+        )
+        self.trainer_user: CustomUser = CustomUser.objects.create_user(
+            username="trainer_user", email="trainer_user@example.com",
+            password="trainerpass123", role=UserRole.TRAINER,
+        )
         self.member: CustomUser = CustomUser.objects.create_user(
             username="member", email="member@example.com",
             password="memberpass123", role=UserRole.MEMBER,
+        )
+        self.external: CustomUser = CustomUser.objects.create_user(
+            username="external", email="external@example.com",
+            password="externalpass123", role=UserRole.EXTERNAL,
         )
         self.category: Category = Category.objects.create(
             code="U14", description="Under 14", age_range="12-13",
@@ -46,6 +58,36 @@ class CategoryAPITests(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_operator_can_create_category(self) -> None:
+        self.client.force_authenticate(user=self.operator)
+        response = self.client.post(
+            "/api/v1/categories/",
+            {"code": "U18", "description": "Under 18", "age_range": "16-17"},
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_trainer_can_list_categories(self) -> None:
+        self.client.force_authenticate(user=self.trainer_user)
+        response = self.client.get("/api/v1/categories/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_trainer_cannot_create_category(self) -> None:
+        self.client.force_authenticate(user=self.trainer_user)
+        response = self.client.post(
+            "/api/v1/categories/",
+            {"code": "U18", "description": "Under 18"},
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_external_cannot_list_categories(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.get("/api/v1/categories/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthenticated_cannot_list_categories(self) -> None:
+        response = self.client.get("/api/v1/categories/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class AthleteAPITests(TestCase):
     """Tests for /api/v1/athletes/ endpoint."""
@@ -64,8 +106,24 @@ class AthleteAPITests(TestCase):
             username="altro", email="altro@example.com",
             password="altropass123", role=UserRole.MEMBER,
         )
+        self.operator: CustomUser = CustomUser.objects.create_user(
+            username="operator", email="operator@example.com",
+            password="operatorpass123", role=UserRole.OPERATOR,
+        )
+        self.trainer_user: CustomUser = CustomUser.objects.create_user(
+            username="trainer_user", email="trainer_user@example.com",
+            password="trainerpass123", role=UserRole.TRAINER,
+        )
+        self.external: CustomUser = CustomUser.objects.create_user(
+            username="external", email="external@example.com",
+            password="externalpass123", role=UserRole.EXTERNAL,
+        )
         self.category: Category = Category.objects.create(
             code="U14", description="Under 14",
+        )
+        self.trainer_obj: Trainer = Trainer.objects.create(
+            first_name="Carlo", last_name="Bianchi",
+            fiscal_code="BNCCRL80A01H501Z", user=self.trainer_user,
         )
         self.athlete: Athlete = Athlete.objects.create(
             guardian=self.member,
@@ -75,6 +133,7 @@ class AthleteAPITests(TestCase):
             date_of_birth="2010-01-01",
             place_of_birth="Roma",
             category=self.category,
+            trainer=self.trainer_obj,
         )
 
     def test_admin_can_list_all_athletes(self) -> None:
@@ -134,6 +193,27 @@ class AthleteAPITests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.data["nationality"])
         self.assertIsNone(response.data["nationality_detail"])
+
+    def test_operator_can_list_athletes(self) -> None:
+        self.client.force_authenticate(user=self.operator)
+        response = self.client.get("/api/v1/athletes/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+
+    def test_trainer_sees_only_assigned_athletes(self) -> None:
+        self.client.force_authenticate(user=self.trainer_user)
+        response = self.client.get("/api/v1/athletes/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+
+    def test_external_cannot_list_athletes(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.get("/api/v1/athletes/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthenticated_cannot_list_athletes(self) -> None:
+        response = self.client.get("/api/v1/athletes/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_admin_can_set_nationality_on_create(self) -> None:
         country: Country = Country.objects.create(name="Francia", iso_code="FRA")

@@ -19,6 +19,18 @@ class SportDoctorAPITests(TestCase):
             username="member", email="member@example.com",
             password="memberpass123", role=UserRole.MEMBER,
         )
+        self.operator: CustomUser = CustomUser.objects.create_user(
+            username="operator", email="operator@example.com",
+            password="operatorpass123", role=UserRole.OPERATOR,
+        )
+        self.trainer_user: CustomUser = CustomUser.objects.create_user(
+            username="trainer_user", email="trainer_user@example.com",
+            password="trainerpass123", role=UserRole.TRAINER,
+        )
+        self.external: CustomUser = CustomUser.objects.create_user(
+            username="external", email="external@example.com",
+            password="externalpass123", role=UserRole.EXTERNAL,
+        )
         self.doctor: SportDoctor = SportDoctor.objects.create(
             first_name="Giuseppe",
             last_name="Verdi",
@@ -57,3 +69,18 @@ class SportDoctorAPITests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.doctor.refresh_from_db()
         self.assertFalse(self.doctor.is_active)
+
+    def test_operator_can_list_doctors(self) -> None:
+        self.client.force_authenticate(user=self.operator)
+        response = self.client.get("/api/v1/doctors/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_trainer_cannot_list_doctors(self) -> None:
+        self.client.force_authenticate(user=self.trainer_user)
+        response = self.client.get("/api/v1/doctors/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_external_cannot_list_doctors(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.get("/api/v1/doctors/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

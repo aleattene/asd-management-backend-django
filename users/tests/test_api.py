@@ -89,6 +89,17 @@ class UserMeTests(TestCase):
         response = client.get("/api/v1/users/me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_external_cannot_access_me(self) -> None:
+        external: CustomUser = CustomUser.objects.create_user(
+            username="external_me",
+            email="external_me@example.com",
+            password="externalpass123",
+            role=UserRole.EXTERNAL,
+        )
+        self.client.force_authenticate(user=external)
+        response = self.client.get("/api/v1/users/me/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class UserCRUDTests(TestCase):
     """Tests for user CRUD (admin/operator only)."""
@@ -113,6 +124,18 @@ class UserCRUDTests(TestCase):
             password="memberpass123",
             role=UserRole.MEMBER,
         )
+        self.external: CustomUser = CustomUser.objects.create_user(
+            username="external",
+            email="external@example.com",
+            password="externalpass123",
+            role=UserRole.EXTERNAL,
+        )
+        self.trainer: CustomUser = CustomUser.objects.create_user(
+            username="trainer",
+            email="trainer@example.com",
+            password="trainerpass123",
+            role=UserRole.TRAINER,
+        )
 
     def test_admin_can_list_users(self) -> None:
         self.client.force_authenticate(user=self.admin)
@@ -128,6 +151,20 @@ class UserCRUDTests(TestCase):
         self.client.force_authenticate(user=self.member)
         response = self.client.get("/api/v1/users/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_external_cannot_list_users(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.get("/api/v1/users/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_trainer_cannot_list_users(self) -> None:
+        self.client.force_authenticate(user=self.trainer)
+        response = self.client.get("/api/v1/users/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthenticated_cannot_list_users(self) -> None:
+        response = self.client.get("/api/v1/users/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_admin_can_create_user(self) -> None:
         self.client.force_authenticate(user=self.admin)
@@ -205,6 +242,17 @@ class UserRoleChangeTests(TestCase):
         self.assertEqual(response.data["role"], "trainer")
         self.member.refresh_from_db()
         self.assertEqual(self.member.role, "trainer")
+
+    def test_superadmin_can_assign_external_role(self) -> None:
+        self.client.force_authenticate(user=self.superadmin)
+        response = self.client.patch(
+            f"/api/v1/users/{self.member.pk}/set_role/",
+            {"role": "external"},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["role"], "external")
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.role, "external")
 
     def test_admin_cannot_change_role(self) -> None:
         self.client.force_authenticate(user=self.admin)

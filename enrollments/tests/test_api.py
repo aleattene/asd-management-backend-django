@@ -36,6 +36,10 @@ class EnrollmentSetupMixin:
             username="trainer", email="trainer@example.com",
             password="trainerpass123", role=UserRole.TRAINER,
         )
+        self.external: CustomUser = CustomUser.objects.create_user(
+            username="external", email="external@example.com",
+            password="externalpass123", role=UserRole.EXTERNAL,
+        )
         self.category: Category = Category.objects.create(
             code="U14", description="Under 14", age_range="12-14",
         )
@@ -98,6 +102,11 @@ class EnrollmentListTests(EnrollmentSetupMixin, TestCase):
         response = self.client.get("/api/v1/enrollments/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_external_cannot_list_enrollments(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.get("/api/v1/enrollments/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class EnrollmentCRUDTests(EnrollmentSetupMixin, TestCase):
     """Tests for enrollment create/update/delete."""
@@ -135,6 +144,18 @@ class EnrollmentCRUDTests(EnrollmentSetupMixin, TestCase):
                 "athlete": self.athlete.pk,
                 "season": "2024/2025",
                 "enrollment_date": "2024-09-01",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_external_cannot_create_enrollment(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.post(
+            "/api/v1/enrollments/",
+            {
+                "athlete": self.athlete.pk,
+                "season": "2023/2024",
+                "enrollment_date": "2023-09-01",
             },
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

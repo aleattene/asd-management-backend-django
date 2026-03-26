@@ -30,6 +30,18 @@ class ReceiptAPITests(TestCase):
             password="memberpass123",
             role=UserRole.MEMBER,
         )
+        self.trainer: CustomUser = CustomUser.objects.create_user(
+            username="trainer",
+            email="trainer@example.com",
+            password="trainerpass123",
+            role=UserRole.TRAINER,
+        )
+        self.external: CustomUser = CustomUser.objects.create_user(
+            username="external",
+            email="external@example.com",
+            password="externalpass123",
+            role=UserRole.EXTERNAL,
+        )
         self.payment_method: PaymentMethod = PaymentMethod.objects.create(
             name="Contanti",
         )
@@ -62,6 +74,16 @@ class ReceiptAPITests(TestCase):
     def test_unauthenticated_cannot_list_receipts(self) -> None:
         response = self.client.get("/api/v1/receipts/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_trainer_cannot_list_receipts(self) -> None:
+        self.client.force_authenticate(user=self.trainer)
+        response = self.client.get("/api/v1/receipts/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_external_cannot_list_receipts(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.get("/api/v1/receipts/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # --- CREATE ---
 

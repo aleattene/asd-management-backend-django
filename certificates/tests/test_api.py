@@ -37,6 +37,10 @@ class CertificateSetupMixin:
             username="trainer", email="trainer@example.com",
             password="trainerpass123", role=UserRole.TRAINER,
         )
+        self.external: CustomUser = CustomUser.objects.create_user(
+            username="external", email="external@example.com",
+            password="externalpass123", role=UserRole.EXTERNAL,
+        )
         self.category: Category = Category.objects.create(
             code="U14", description="Under 14", age_range="12-14",
         )
@@ -105,6 +109,11 @@ class CertificateListTests(CertificateSetupMixin, TestCase):
         response = self.client.get("/api/v1/certificates/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_external_cannot_list_certificates(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.get("/api/v1/certificates/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class CertificateCRUDTests(CertificateSetupMixin, TestCase):
     """Tests for certificate create/update/delete."""
@@ -141,6 +150,19 @@ class CertificateCRUDTests(CertificateSetupMixin, TestCase):
             "/api/v1/certificates/",
             {
                 "athlete": self.athlete.pk,
+                "doctor": self.doctor.pk,
+                "issue_date": "2024-09-01",
+                "expiration_date": "2025-09-01",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_external_cannot_create_certificate(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.post(
+            "/api/v1/certificates/",
+            {
+                "athlete": self.other_athlete.pk,
                 "doctor": self.doctor.pk,
                 "issue_date": "2024-09-01",
                 "expiration_date": "2025-09-01",

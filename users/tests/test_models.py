@@ -107,3 +107,13 @@ class CustomUserModelTests(TestCase):
         self.assertEqual(self.user.address_number, "")
         self.assertEqual(self.user.address_zip, "")
         self.assertIsNone(self.user.municipality)
+
+    def test_external_role_can_be_assigned(self) -> None:
+        user: CustomUser = CustomUser.objects.create_user(
+            username="external",
+            email="external@example.com",
+            password="testpass123",
+            role=UserRole.EXTERNAL,
+        )
+        self.assertEqual(user.role, UserRole.EXTERNAL)
+        self.assertEqual(user.role, "external")

@@ -19,6 +19,18 @@ class GeographySetupMixin:
             username="member", email="member@example.com",
             password="memberpass123", role=UserRole.MEMBER,
         )
+        self.operator: CustomUser = CustomUser.objects.create_user(
+            username="operator", email="operator@example.com",
+            password="operatorpass123", role=UserRole.OPERATOR,
+        )
+        self.trainer_user: CustomUser = CustomUser.objects.create_user(
+            username="trainer_user", email="trainer_user@example.com",
+            password="trainerpass123", role=UserRole.TRAINER,
+        )
+        self.external: CustomUser = CustomUser.objects.create_user(
+            username="external", email="external@example.com",
+            password="externalpass123", role=UserRole.EXTERNAL,
+        )
         self.country: Country = Country.objects.create(
             name="Italia", iso_code="ITA"
         )
@@ -64,6 +76,32 @@ class CountryAPITests(GeographySetupMixin, TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_operator_can_create_country(self) -> None:
+        self.client.force_authenticate(user=self.operator)
+        response = self.client.post(
+            "/api/v1/countries/",
+            {"name": "Germania", "iso_code": "DEU"},
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_trainer_can_list_countries(self) -> None:
+        self.client.force_authenticate(user=self.trainer_user)
+        response = self.client.get("/api/v1/countries/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_trainer_cannot_create_country(self) -> None:
+        self.client.force_authenticate(user=self.trainer_user)
+        response = self.client.post(
+            "/api/v1/countries/",
+            {"name": "Germania", "iso_code": "DEU"},
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_external_cannot_list_countries(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.get("/api/v1/countries/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class ProvinceAPITests(GeographySetupMixin, TestCase):
     """Tests for /api/v1/provinces/."""
@@ -94,6 +132,20 @@ class ProvinceAPITests(GeographySetupMixin, TestCase):
             {"name": "Milano", "code": "MI"},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_trainer_can_list_provinces(self) -> None:
+        self.client.force_authenticate(user=self.trainer_user)
+        response = self.client.get("/api/v1/provinces/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_external_cannot_list_provinces(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.get("/api/v1/provinces/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthenticated_cannot_list_provinces(self) -> None:
+        response = self.client.get("/api/v1/provinces/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class MunicipalityAPITests(GeographySetupMixin, TestCase):
@@ -138,3 +190,17 @@ class MunicipalityAPITests(GeographySetupMixin, TestCase):
             {"name": "Ostia", "province": self.province.pk},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_trainer_can_list_municipalities(self) -> None:
+        self.client.force_authenticate(user=self.trainer_user)
+        response = self.client.get("/api/v1/municipalities/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_external_cannot_list_municipalities(self) -> None:
+        self.client.force_authenticate(user=self.external)
+        response = self.client.get("/api/v1/municipalities/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthenticated_cannot_list_municipalities(self) -> None:
+        response = self.client.get("/api/v1/municipalities/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
