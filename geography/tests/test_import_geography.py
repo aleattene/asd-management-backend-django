@@ -140,3 +140,10 @@ class ImportEdgeCaseTests(TestCase):
         with patch(PATCH_TARGET, fake_dir):
             with self.assertRaises(CommandError):
                 call_command("import_geography", "--countries")
+
+    @patch(PATCH_TARGET, TEST_DATA_DIR)
+    def test_municipalities_without_provinces_returns_error_message(self) -> None:
+        from io import StringIO
+        stderr = StringIO()
+        call_command("import_geography", "--municipalities", stderr=stderr)
+        self.assertEqual(Municipality.objects.count(), 0)
