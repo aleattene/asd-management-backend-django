@@ -20,7 +20,14 @@ if os.path.exists(env_file_path):
     environ.Env.read_env(env_file_path)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY: str = os.environ["SECRET_KEY"]
+# test.py overrides this with a dedicated key — all other environments must set SECRET_KEY.
+_secret_key: str | None = os.getenv("SECRET_KEY")
+if not _secret_key:
+    raise RuntimeError(
+        "SECRET_KEY environment variable is missing. "
+        "This variable is mandatory and must be set before starting the application."
+    )
+SECRET_KEY: str = _secret_key
 
 ALLOWED_HOSTS: list[str] = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 

@@ -22,8 +22,6 @@ Django REST Framework backend for the internal management of a Sports Associatio
 This is **not** an e-commerce or SaaS platform — it is a management tool used
 by ASD staff and members to handle registrations, documentation, and athlete data.
 
-The frontend (React) lives in a separate repository and consumes these APIs.
-
 **Stack:**
 - Python 3.13+
 - Django 6.0+

@@ -26,26 +26,30 @@ SEED_ENV: dict[str, str] = {
 }
 
 
-@override_settings(DEBUG=True)
-@mock.patch.dict(os.environ, SEED_ENV)
 class SeedDbSmokeTests(TestCase):
-    """Smoke tests for the seed_db management command."""
+    """Smoke tests for the seed_db management command.
+
+    seed_db is called once for the whole class via setUpTestData to avoid
+    repeating the full seeding (Faker-backed factories) for every test method.
+    """
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        with override_settings(DEBUG=True):
+            with mock.patch.dict(os.environ, SEED_ENV):
+                call_command("seed_db")
 
     def test_seed_creates_payment_methods(self) -> None:
-        call_command("seed_db")
         self.assertEqual(PaymentMethod.objects.count(), 4)
 
     def test_seed_creates_categories(self) -> None:
-        call_command("seed_db")
         self.assertEqual(Category.objects.count(), 7)
 
     def test_seed_creates_users(self) -> None:
-        call_command("seed_db")
         # 2 admins + 3 operators + 4 trainers + 10 members + 3 externals + superadmin + admin
         self.assertEqual(CustomUser.objects.count(), 24)
 
     def test_seed_creates_superadmin(self) -> None:
-        call_command("seed_db")
         self.assertTrue(
             CustomUser.objects.filter(
                 username=SEED_ENV["SEED_SUPERADMIN_USERNAME"], is_superuser=True
@@ -53,41 +57,32 @@ class SeedDbSmokeTests(TestCase):
         )
 
     def test_seed_creates_known_admin(self) -> None:
-        call_command("seed_db")
         self.assertTrue(
             CustomUser.objects.filter(username=SEED_ENV["SEED_ADMIN_USERNAME"]).exists()
         )
 
     def test_seed_creates_trainers(self) -> None:
-        call_command("seed_db")
         self.assertEqual(Trainer.objects.count(), 4)
 
     def test_seed_creates_doctors(self) -> None:
-        call_command("seed_db")
         self.assertEqual(SportDoctor.objects.count(), 3)
 
     def test_seed_creates_athletes(self) -> None:
-        call_command("seed_db")
         self.assertEqual(Athlete.objects.count(), 15)
 
     def test_seed_creates_enrollments(self) -> None:
-        call_command("seed_db")
         self.assertEqual(Enrollment.objects.count(), 15)
 
     def test_seed_creates_certificates(self) -> None:
-        call_command("seed_db")
         self.assertEqual(SportCertificate.objects.count(), 15)
 
     def test_seed_creates_companies(self) -> None:
-        call_command("seed_db")
         self.assertEqual(Company.objects.count(), 10)
 
     def test_seed_creates_invoices(self) -> None:
-        call_command("seed_db")
         self.assertEqual(Invoice.objects.count(), 20)
 
     def test_seed_creates_receipts(self) -> None:
-        call_command("seed_db")
         self.assertEqual(Receipt.objects.count(), 15)
 
 

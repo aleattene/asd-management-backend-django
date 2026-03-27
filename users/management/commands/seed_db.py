@@ -3,6 +3,7 @@ import os
 from athletes.models import Category
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 from payment_methods.models import PaymentMethod
 
 from users.models import CustomUser, UserRole
@@ -39,6 +40,15 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options) -> None:
+        if not settings.DEBUG:
+            raise CommandError(
+                "seed_db is intended for development only and cannot run with DEBUG=False. "
+                "Set DEBUG=True or use the correct settings module."
+            )
+
+        # Validate all required env vars upfront — before any DB write.
+        self._validate_seed_env()
+
         try:
             from factories import (
                 AthleteFactory,
@@ -53,10 +63,10 @@ class Command(BaseCommand):
                 TrainerFactory,
                 UserFactory,
             )
-        except ImportError as exc:
+        except ModuleNotFoundError as exc:
             raise CommandError(
                 "Dev dependencies are not installed. "
-                "Run: pip install -r requirements_dev.txt"
+                "Run: pip install -r requirements_dev.txt, then retry."
             ) from exc
 
         self.AthleteFactory = AthleteFactory
@@ -71,34 +81,46 @@ class Command(BaseCommand):
         self.TrainerFactory = TrainerFactory
         self.UserFactory = UserFactory
 
-        if not settings.DEBUG:
-            raise CommandError(
-                "seed_db is intended for development only and cannot run with DEBUG=False. "
-                "Set DEBUG=True or use the correct settings module."
-            )
+        with transaction.atomic():
+            if options["flush"]:
+                self._flush()
 
-        if options["flush"]:
-            self._flush()
+            self.stdout.write("Seeding database...")
 
-        self.stdout.write("Seeding database...")
-
-        payment_methods = self._seed_payment_methods()
-        categories = self._seed_categories()
-        users = self._seed_users()
-        trainers = self._seed_trainers(users["trainers"])
-        doctors = self._seed_doctors()
-        athletes = self._seed_athletes(users["members"], categories, trainers)
-        self._seed_enrollments(athletes)
-        self._seed_certificates(athletes, doctors)
-        companies = self._seed_companies()
-        self._seed_invoices(companies, payment_methods)
-        self._seed_receipts(users["members"] + users["trainers"], payment_methods)
+            payment_methods = self._seed_payment_methods()
+            categories = self._seed_categories()
+            users = self._seed_users()
+            trainers = self._seed_trainers(users["trainers"])
+            doctors = self._seed_doctors()
+            athletes = self._seed_athletes(users["members"], categories, trainers)
+            self._seed_enrollments(athletes)
+            self._seed_certificates(athletes, doctors)
+            companies = self._seed_companies()
+            self._seed_invoices(companies, payment_methods)
+            self._seed_receipts(users["members"] + users["trainers"], payment_methods)
 
         self.stdout.write(self.style.SUCCESS("Database seeded successfully."))
 
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
+
+    def _validate_seed_env(self) -> None:
+        """Raise CommandError if any required SEED_* env var is missing."""
+        required: list[str] = [
+            "SEED_SUPERADMIN_USERNAME",
+            "SEED_SUPERADMIN_EMAIL",
+            "SEED_SUPERADMIN_PASSWORD",
+            "SEED_ADMIN_USERNAME",
+            "SEED_ADMIN_EMAIL",
+            "SEED_ADMIN_PASSWORD",
+        ]
+        missing: list[str] = [var for var in required if not os.environ.get(var)]
+        if missing:
+            raise CommandError(
+                f"The following environment variables are required but not set: "
+                f"{', '.join(missing)}"
+            )
 
     def _flush(self) -> None:
         """Delete all non-superuser data."""
@@ -159,15 +181,10 @@ class Command(BaseCommand):
             created[cfg["key"]] = users
             self.stdout.write(f"  Users ({cfg['role']}): {len(users)}")
 
-        # Ensure one known superadmin for FE login
-        superadmin_username: str | None = os.environ.get("SEED_SUPERADMIN_USERNAME")
-        superadmin_email: str | None = os.environ.get("SEED_SUPERADMIN_EMAIL")
-        superadmin_password: str | None = os.environ.get("SEED_SUPERADMIN_PASSWORD")
-        if not all([superadmin_username, superadmin_email, superadmin_password]):
-            raise CommandError(
-                "SEED_SUPERADMIN_USERNAME, SEED_SUPERADMIN_EMAIL and "
-                "SEED_SUPERADMIN_PASSWORD environment variables are required."
-            )
+        # Ensure one known superadmin
+        superadmin_username: str = os.environ["SEED_SUPERADMIN_USERNAME"]
+        superadmin_email: str = os.environ["SEED_SUPERADMIN_EMAIL"]
+        superadmin_password: str = os.environ["SEED_SUPERADMIN_PASSWORD"]
         if not CustomUser.objects.filter(username=superadmin_username).exists():
             CustomUser.objects.create_superuser(
                 username=superadmin_username,
@@ -176,7 +193,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(f"  Superadmin created (username: {superadmin_username})")
 
-        # Known admin for FE login
+        # Ensure one known admin
         admin_username: str | None = os.environ.get("SEED_ADMIN_USERNAME")
         admin_email: str | None = os.environ.get("SEED_ADMIN_EMAIL")
         admin_password: str | None = os.environ.get("SEED_ADMIN_PASSWORD")
