@@ -1,26 +1,10 @@
-from rest_framework import permissions, viewsets, status
+from rest_framework import viewsets, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from config.permissions import IsAdminOrOperatorOrReadOnly
 from certificates.models import SportCertificate
 from .serializers import SportCertificateListSerializer, SportCertificateDetailSerializer
-
-
-class CertificatePermission(permissions.BasePermission):
-    """
-    - external: no access
-    - admin/operator/superadmin: full CRUD
-    - trainer/member: read-only (queryset scoping handled in viewset)
-    """
-
-    def has_permission(self, request: Request, view) -> bool:
-        if not request.user or not request.user.is_authenticated:
-            return False
-        if request.user.role == "external":
-            return False
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return request.user.role in ("admin", "superadmin", "operator")
 
 
 class SportCertificateViewSet(viewsets.ModelViewSet):
@@ -32,7 +16,7 @@ class SportCertificateViewSet(viewsets.ModelViewSet):
     - member: read-only, own guardian athletes only
     """
 
-    permission_classes: list = [CertificatePermission]
+    permission_classes: list = [IsAdminOrOperatorOrReadOnly]
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
