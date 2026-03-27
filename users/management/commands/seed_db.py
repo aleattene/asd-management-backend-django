@@ -34,7 +34,9 @@ class Command(BaseCommand):
             "--flush",
             action="store_true",
             help=(
-                "Delete all existing non-superuser data before seeding. "
+                "Delete seeded data (users, athletes, enrollments, certificates, "
+                "trainers, doctors, companies, payment methods, invoices, receipts) "
+                "before seeding. Superusers and geography data are preserved. "
                 "Required for safe repeat runs."
             ),
         )
@@ -64,10 +66,12 @@ class Command(BaseCommand):
                 UserFactory,
             )
         except ModuleNotFoundError as exc:
-            raise CommandError(
-                "Dev dependencies are not installed. "
-                "Run: pip install -r requirements_dev.txt, then retry."
-            ) from exc
+            if exc.name and exc.name.split(".")[0] in {"factory", "faker", "factories"}:
+                raise CommandError(
+                    "Dev dependencies are not installed. "
+                    "Run: pip install -r requirements_dev.txt, then retry."
+                ) from exc
+            raise
 
         self.AthleteFactory = AthleteFactory
         self.CategoryFactory = CategoryFactory
@@ -123,7 +127,9 @@ class Command(BaseCommand):
             )
 
     def _flush(self) -> None:
-        """Delete all non-superuser data."""
+        """Delete seeded data: users (non-superusers), athletes, enrollments,
+        certificates, trainers, doctors, companies, payment methods, invoices,
+        and receipts. Geography data and auth tables are preserved."""
         from athletes.models import Athlete, Category
         from certificates.models import SportCertificate
         from companies.models import Company
@@ -151,7 +157,7 @@ class Command(BaseCommand):
     def _seed_payment_methods(self) -> list:
         methods = []
         for name in PAYMENT_METHOD_NAMES:
-            pm, _ = PaymentMethod.objects.get_or_create(name=name)
+            pm, _ = PaymentMethod.objects.update_or_create(name=name)
             methods.append(pm)
         self.stdout.write(f"  Payment methods: {len(methods)}")
         return methods
@@ -159,7 +165,7 @@ class Command(BaseCommand):
     def _seed_categories(self) -> list:
         cats = []
         for data in CATEGORIES:
-            cat, _ = Category.objects.get_or_create(
+            cat, _ = Category.objects.update_or_create(
                 code=data["code"],
                 defaults={"description": data["description"], "age_range": data["age_range"]},
             )
