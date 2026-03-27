@@ -45,6 +45,47 @@ class JWTAuthTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("access", response.data)
 
+    def test_refresh_token_rotation_returns_new_refresh(self) -> None:
+        """Refresh should return a new refresh token (ROTATE_REFRESH_TOKENS=True)."""
+        token_response = self.client.post(
+            "/api/v1/auth/token/",
+            {"username": "testuser", "password": "testpass123"},
+        )
+        self.assertEqual(token_response.status_code, status.HTTP_200_OK)
+        self.assertIn("refresh", token_response.data)
+        old_refresh: str = token_response.data["refresh"]
+        response = self.client.post(
+            "/api/v1/auth/token/refresh/",
+            {"refresh": old_refresh},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("refresh", response.data)
+        self.assertNotEqual(response.data["refresh"], old_refresh)
+
+    def test_refresh_token_blacklisted_after_rotation(self) -> None:
+        """Old refresh token must be rejected after rotation (BLACKLIST_AFTER_ROTATION=True)."""
+        token_response = self.client.post(
+            "/api/v1/auth/token/",
+            {"username": "testuser", "password": "testpass123"},
+        )
+        self.assertEqual(token_response.status_code, status.HTTP_200_OK)
+        self.assertIn("refresh", token_response.data)
+        old_refresh: str = token_response.data["refresh"]
+        # Use the refresh token once — it gets rotated and blacklisted
+        first_refresh = self.client.post(
+            "/api/v1/auth/token/refresh/",
+            {"refresh": old_refresh},
+        )
+        self.assertEqual(first_refresh.status_code, status.HTTP_200_OK)
+        self.assertIn("refresh", first_refresh.data)
+        self.assertNotEqual(first_refresh.data["refresh"], old_refresh)
+        # Attempt to reuse the old refresh token — should fail
+        response = self.client.post(
+            "/api/v1/auth/token/refresh/",
+            {"refresh": old_refresh},
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class UserMeTests(TestCase):
     """Tests for /api/v1/users/me/ endpoint."""

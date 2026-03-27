@@ -41,6 +41,10 @@ INSTALLED_APPS: list[str] = [
     "django_filters",
     "django_extensions",
     "drf_spectacular",
+    # Third-party (token blacklist)
+    # NOTE: this app creates new DB tables — run `python manage.py migrate`
+    # in all environments (production, staging, CI) after adding or upgrading simplejwt.
+    "rest_framework_simplejwt.token_blacklist",
     # Project apps
     "users",
     "athletes",
@@ -145,12 +149,14 @@ REST_FRAMEWORK: dict = {
 
 
 # SimpleJWT
+# Note: BLACKLIST_AFTER_ROTATION=True persists rows in OutstandingToken/BlacklistedToken tables.
+# Schedule `python manage.py flushexpiredtokens` periodically (e.g. nightly cron) to prevent unbounded growth.
 
 SIMPLE_JWT: dict = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": False,
+    "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
