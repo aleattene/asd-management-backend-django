@@ -19,7 +19,7 @@ class UserViewSet(viewsets.ModelViewSet):
     CRUD API for user management.
 
     - list/create/update/delete: admin and operator only
-    - me: any authenticated user can view/update their own profile
+    - me: any authenticated non-external user can view/update their own profile
     """
 
     queryset = CustomUser.objects.filter(is_active=True)

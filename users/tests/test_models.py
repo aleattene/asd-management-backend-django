@@ -116,4 +116,4 @@ class CustomUserModelTests(TestCase):
             role=UserRole.EXTERNAL,
         )
         self.assertEqual(user.role, UserRole.EXTERNAL)
-        self.assertEqual(user.role, "external")
+        self.assertEqual(user.get_role_display(), "Collaboratore Esterno")

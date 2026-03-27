@@ -8,6 +8,7 @@ from .serializers import EnrollmentListSerializer, EnrollmentDetailSerializer
 
 class EnrollmentPermission(permissions.BasePermission):
     """
+    - external: no access
     - admin/operator/superadmin: full CRUD
     - trainer/member: read-only (queryset scoping handled in viewset)
     """
