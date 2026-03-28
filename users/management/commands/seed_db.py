@@ -54,11 +54,9 @@ class Command(BaseCommand):
         try:
             from factories import (
                 AthleteFactory,
-                CategoryFactory,
                 CompanyFactory,
                 EnrollmentFactory,
                 InvoiceFactory,
-                PaymentMethodFactory,
                 ReceiptFactory,
                 SportCertificateFactory,
                 SportDoctorFactory,
@@ -74,11 +72,9 @@ class Command(BaseCommand):
             raise
 
         self.AthleteFactory = AthleteFactory
-        self.CategoryFactory = CategoryFactory
         self.CompanyFactory = CompanyFactory
         self.EnrollmentFactory = EnrollmentFactory
         self.InvoiceFactory = InvoiceFactory
-        self.PaymentMethodFactory = PaymentMethodFactory
         self.ReceiptFactory = ReceiptFactory
         self.SportCertificateFactory = SportCertificateFactory
         self.SportDoctorFactory = SportDoctorFactory
@@ -158,7 +154,9 @@ class Command(BaseCommand):
     def _seed_payment_methods(self) -> list:
         methods = []
         for name in PAYMENT_METHOD_NAMES:
-            pm, _ = PaymentMethod.objects.update_or_create(name=name)
+            pm, _ = PaymentMethod.objects.update_or_create(
+                name=name, defaults={"is_active": True}
+            )
             methods.append(pm)
         self.stdout.write(f"  Payment methods: {len(methods)}")
         return methods
@@ -168,7 +166,11 @@ class Command(BaseCommand):
         for data in CATEGORIES:
             cat, _ = Category.objects.update_or_create(
                 code=data["code"],
-                defaults={"description": data["description"], "age_range": data["age_range"]},
+                defaults={
+                    "description": data["description"],
+                    "age_range": data["age_range"],
+                    "is_active": True,
+                },
             )
             cats.append(cat)
         self.stdout.write(f"  Categories: {len(cats)}")
