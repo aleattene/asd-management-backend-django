@@ -207,15 +207,12 @@ class Command(BaseCommand):
         admin_email: str = os.environ["SEED_ADMIN_EMAIL"]
         admin_password: str = os.environ["SEED_ADMIN_PASSWORD"]
         if not CustomUser.objects.filter(username=admin_username).exists():
-            self.UserFactory(
+            CustomUser.objects.create_user(
                 username=admin_username,
                 email=admin_email,
-                password=None,
+                password=admin_password,
                 role=UserRole.ADMIN,
             )
-            user = CustomUser.objects.get(username=admin_username)
-            user.set_password(admin_password)
-            user.save()
             self.stdout.write(f"  Admin created (username: {admin_username})")
 
         return created
