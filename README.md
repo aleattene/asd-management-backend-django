@@ -22,8 +22,6 @@ Django REST Framework backend for the internal management of a Sports Associatio
 This is **not** an e-commerce or SaaS platform — it is a management tool used
 by ASD staff and members to handle registrations, documentation, and athlete data.
 
-The frontend (React) lives in a separate repository and consumes these APIs.
-
 **Stack:**
 - Python 3.13+
 - Django 6.0+
@@ -181,6 +179,34 @@ http://localhost:8000/api/schema/
 | GET/PATCH/DELETE | `/api/v1/invoices/{id}/` | Invoice detail | Admin/Operator/Superadmin |
 | GET/POST | `/api/v1/receipts/` | List/create receipts | Admin/Operator/Superadmin |
 | GET/PATCH/DELETE | `/api/v1/receipts/{id}/` | Receipt detail | Admin/Operator/Superadmin |
+
+---
+
+## Development data
+
+To populate the local database with realistic seed data (users, athletes, enrollments, invoices, etc.),
+the following environment variables must be set in your `.env` file (see `.env.example`):
+
+```bash
+SEED_SUPERADMIN_USERNAME=
+SEED_SUPERADMIN_EMAIL=
+SEED_SUPERADMIN_PASSWORD=
+SEED_ADMIN_USERNAME=
+SEED_ADMIN_EMAIL=
+SEED_ADMIN_PASSWORD=
+```
+
+Requires `DEBUG=True` and dev dependencies installed (`pip install -r requirements_dev.txt`).
+
+```bash
+python manage.py seed_db
+```
+
+To reset and re-seed from scratch (preserves existing superusers):
+
+```bash
+python manage.py seed_db --flush
+```
 
 ---
 

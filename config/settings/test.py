@@ -2,6 +2,12 @@
 Test settings for ASD Management project.
 """
 
+import os
+
+# Must be set before importing base to satisfy the SECRET_KEY guard.
+if not os.environ.get("SECRET_KEY"):
+    os.environ["SECRET_KEY"] = "test-secret-key-long-enough-to-run-tests"
+
 from .base import *  # noqa: F401, F403
 
 DEBUG = False
